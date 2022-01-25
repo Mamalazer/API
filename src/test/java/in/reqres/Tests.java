@@ -5,6 +5,8 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -111,6 +113,60 @@ public class Tests {
 
         Assertions.assertEquals(expected, actual, "Неверная сортировка годов в ответе");
 
+    }
+
+    @Test
+    public void deleteUser() {
+
+        Specifications.installSpecification(Specifications.requestSpec(REQRES),
+                Specifications.responseSpec204());
+
+        given()
+                .when()
+                .delete(DELETE)
+                .then().log().all();
+
+    }
+
+    @Test
+    public void updateUser() {
+
+        Specifications.installSpecification(Specifications.requestSpec(REQRES),
+                Specifications.responseSpec200());
+
+        UpdateUser updateUser = new UpdateUser(NAME, JOB);
+
+        UpdatedUser updatedUser = given()
+                .body(updateUser)
+                .when()
+                .put(UPDATE)
+                .then().log().all()
+                .extract().as(UpdatedUser.class);
+
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter d = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        Assertions.assertTrue(updatedUser.getUpdatedAt().contains(date.format(d)),
+                "Дата обновления информации о пользователе не совпадает с текущей");
+
+    }
+
+    @Test
+    public void getSingleUser() {
+
+        Specifications.installSpecification(Specifications.requestSpec(REQRES),
+                Specifications.responseSpec200());
+
+        SingleUser singleUser = given()
+                .when()
+                .get(SINGLE_USER)
+                .then().log().all()
+                .extract().as(SingleUser.class);
+
+        UserData userData = new UserData(2, "janet.weaver@reqres.in", "Janet", "Weaver",
+                "https://reqres.in/img/faces/2-image.jpg");
+
+        Assertions.assertEquals(userData, singleUser.getData(), "Возвращён неверный user");
 
     }
 

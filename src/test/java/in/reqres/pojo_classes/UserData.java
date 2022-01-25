@@ -1,5 +1,7 @@
 package in.reqres.pojo_classes;
 
+import java.util.Objects;
+
 public class UserData {
 
     private Integer id;
@@ -40,4 +42,16 @@ public class UserData {
         return avatar;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserData userData = (UserData) o;
+        return Objects.equals(id, userData.id) && Objects.equals(email, userData.email) && Objects.equals(first_name, userData.first_name) && Objects.equals(last_name, userData.last_name) && Objects.equals(avatar, userData.avatar);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email, first_name, last_name, avatar);
+    }
 }
