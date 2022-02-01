@@ -1,0 +1,5 @@
+.idea/*
+target/*
+build/*
+README.md
+allure-results

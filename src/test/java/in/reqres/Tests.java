@@ -1,13 +1,14 @@
 package in.reqres;
 
 import in.reqres.pojo_classes.*;
-import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static in.reqres.Endpoints.*;
@@ -167,6 +168,87 @@ public class Tests {
                 "https://reqres.in/img/faces/2-image.jpg");
 
         Assertions.assertEquals(userData, singleUser.getData(), "Возвращён неверный user");
+
+    }
+
+    @Test
+    public void getUnknownUser() {
+
+        Specifications.installSpecification(Specifications.requestSpec(REQRES),
+                Specifications.responseSpec404());
+
+        String response = given()
+                .when()
+                .get(UNKNOWN_USER)
+                .then().log().all()
+                .extract().asString();
+
+        Assertions.assertEquals("{}", response, "Найден пользователь, которого не существует");
+
+    }
+
+    @Test
+    public void createUser() {
+
+        Specifications.installSpecification(Specifications.requestSpec(REQRES),
+                Specifications.responseSpec201());
+
+        Map<String, String> newUser = new HashMap<>();
+        newUser.put("name", "morpheus");
+        newUser.put("job", "leader");
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter d = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        CreatedUser user = given()
+                .body(newUser)
+                .when()
+                .post(CREATE_USER)
+                .then().log().all()
+                .extract().as(CreatedUser.class);
+
+        Assertions.assertEquals( "morpheus", user.getName(), "Неверное имя пользователя");
+        Assertions.assertEquals( "leader", user.getJob(), "Неверное название работы пользователя");
+        Assertions.assertTrue(user.getCreatedAt().contains(date.format(d)), "Дата создания не соответствует текущей");
+
+    }
+
+    @Test
+    public void positiveLogin() {
+
+        Specifications.installSpecification(Specifications.requestSpec(REQRES),
+                Specifications.responseSpec200());
+
+        Registration credentials = new Registration("eve.holt@reqres.in", "cityslicka");
+
+        Token token = given()
+                .body(credentials)
+                .when()
+                .post(LOGIN)
+                .then().log().all()
+                .extract().as(Token.class);
+
+        Assertions.assertNotNull(token);
+
+    }
+
+    @Test
+    public void negativeLogin() {
+
+        Specifications.installSpecification(Specifications.requestSpec(REQRES),
+                Specifications.responseSpec400());
+
+        Map<String, String> email = new HashMap<>();
+        email.put("email", "peter@klaven");
+
+        UnsuccessfulRegistration error = given()
+                .body(email)
+                .when()
+                .post(LOGIN)
+                .then().log().all()
+                .extract().as(UnsuccessfulRegistration.class);
+
+        Assertions.assertEquals("Missing password", error.getError(),
+                "Неверный текст ошибки при логине без указания пароля");
 
     }
 
