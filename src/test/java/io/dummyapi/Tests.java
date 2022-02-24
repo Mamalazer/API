@@ -18,4 +18,12 @@ public class Tests {
         getUsers(0, 20);
     }
 
+    @Test
+    public void updateUserInfo() {
+        User user = createUser();
+        updateUser(user);
+        deleteUser(user);
+        getDeletedUserById(user);
+    }
+
 }
