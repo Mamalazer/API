@@ -3,8 +3,7 @@ package io.dummyapi;
 import io.dummyapi.pojo_classes.User;
 import org.junit.jupiter.api.Test;
 
-import static io.dummyapi.user_data_steps.Steps.createUser;
-import static io.dummyapi.user_data_steps.Steps.deleteUser;
+import static io.dummyapi.user_data_steps.Steps.*;
 
 public class Tests {
 
@@ -12,6 +11,11 @@ public class Tests {
     public void createAndDeleteUser() {
         User user = createUser();
         deleteUser(user);
+    }
+
+    @Test
+    public void getAllUsers() {
+        getUsers(0, 20);
     }
 
 }

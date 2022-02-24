@@ -1,24 +1,26 @@
 package io.dummyapi.user_data_steps;
 
-import in.reqres.Specifications;
+import io.dummyapi.Specifications;
 import io.dummyapi.pojo_classes.User;
+import io.dummyapi.pojo_classes.UserPreview;
 import io.qameta.allure.Owner;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 
-import static io.dummyapi.Endpoints.CREATE_USER;
-import static io.dummyapi.Endpoints.DELETE_USER;
+import static io.dummyapi.Endpoints.*;
+import static io.dummyapi.Specifications.*;
 import static io.dummyapi.TestData.*;
 import static io.dummyapi.Url.DUMMYAPI;
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Steps {
 
     @Step("Создание нового пользователя")
     @Owner("DRKuznetsov")
     public static User createUser() {
-        in.reqres.Specifications.installSpecification(in.reqres.Specifications.requestSpec(DUMMYAPI),
-                Specifications.responseSpec200());
+        installSpecification(requestSpec(DUMMYAPI), responseSpec200());
 
         User userBody = new User(TITTLE, NAME, LAST_NAME, GENDER,
                 EMAIL, PHONE_NUMBER, PICTURE_URL);
@@ -31,11 +33,11 @@ public class Steps {
                 .then().log().all()
                 .extract().as(User.class);
 
-        Assertions.assertEquals(user.getFirstName(), userBody.getFirstName(),
+        assertEquals(user.getFirstName(), userBody.getFirstName(),
                 "Имя пользователя не соответствует создаваемому в запросе");
-        Assertions.assertEquals(user.getLastName(), userBody.getLastName(),
+        assertEquals(user.getLastName(), userBody.getLastName(),
                 "Фамилия пользователя не соответствует создаваемой в запросе");
-        Assertions.assertEquals(user.getEmail(), userBody.getEmail(),
+        assertEquals(user.getEmail(), userBody.getEmail(),
                 "Email пользователя не соответствует создаваемому в запросе");
 
         return user;
@@ -44,8 +46,7 @@ public class Steps {
     @Step("Удаление пользователя")
     @Owner("DRKuznetsov")
     public static void deleteUser(User user) {
-        in.reqres.Specifications.installSpecification(in.reqres.Specifications.requestSpec(DUMMYAPI),
-                Specifications.responseSpec200());
+        installSpecification(requestSpec(DUMMYAPI), responseSpec200());
 
         String id = given()
                 .header(APP_ID_HEADER_NAME, APP_ID_KEY)
@@ -54,7 +55,31 @@ public class Steps {
                 .then().log().all()
                 .extract().body().jsonPath().getString("id");
 
-        Assertions.assertEquals(id, user.getId(), "Удалён не тот пользователь");
+        assertEquals(id, user.getId(), "Удалён не тот пользователь");
     }
 
+    /**
+     * @param page value should be in range [0-999]. Default value: 0
+     * @param limit value should be in range [5-50]. Default value: 20
+     */
+    @Step("Получение полного списка пользователей")
+    @Owner("DRKuznetsov")
+    public static UserPreview getUsers(int page, int limit) {
+        installSpecification(requestSpec(DUMMYAPI), responseSpec200());
+
+        UserPreview users = given()
+                .param("page", page)
+                .param("limit", limit)
+                .header(APP_ID_HEADER_NAME, APP_ID_KEY)
+                .when()
+                .get(LIST_OF_USERS)
+                .then().log().all()
+                .extract().as(UserPreview.class);
+
+        assertNotNull(users.getData(), "Список пользователей пуст");
+        assertEquals(users.getData().size(), limit, "Количество пользователей не соответствует запрошенному");
+        assertEquals(users.getPage(), page, "Открытая страница не соответствует запрашиваемой");
+
+        return users;
+    }
 }
