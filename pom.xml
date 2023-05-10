@@ -15,8 +15,8 @@
         <jackson-databind>2.13.1</jackson-databind>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
 
-        <aspectj.version>1.9.7</aspectj.version>
-        <allure.version>2.17.2</allure.version>
+        <aspectj.version>1.9.8</aspectj.version>
+        <allure.version>2.22.0</allure.version>
     </properties>
 
     <dependencies>

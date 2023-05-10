@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Api_youtube" />
+        <module name="API" />
       </profile>
     </annotationProcessing>
   </component>
